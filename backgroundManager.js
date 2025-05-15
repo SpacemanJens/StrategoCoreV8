@@ -1647,6 +1647,7 @@ class BackgroundManager {
 
     // Draw all scene elements
     drawBackground() {
+        if (!shared.showBackroundStarts) return; // Skip if background stars are disabled
         // Draw background stars
         this.drawStars();
 

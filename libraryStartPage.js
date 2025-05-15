@@ -28,7 +28,7 @@ function drawRulesSection() {
     "When the game starts use the keys WASD to move around on the planet, \n" +
     "TFGH to move around within the visible part of the game ares and click \n" +
     "with the mouse to shoot. Use Warp Gates to warp to other planets and \n" +
-    "avoid being shot by canons, bosses, opponents or touched by a spider. \n" +
+    "avoid being shot. \n" +
     "The opponent spacecrafts are cloaked before the first battle. Touch \n" +
     "an opponent to battle and touch the their Core Command or shoot it\n" +
     "10 times to win. Have fun — and may the best team win!\n";

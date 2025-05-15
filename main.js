@@ -6,7 +6,7 @@
 //===================================================
 // CONSTANTS AND GLOBAL VARIABLES
 //===================================================
-const room = new URLSearchParams(location.search).get("room"); 
+const room = new URLSearchParams(location.search).get("room");
 
 // Party System Global Variables jens3    
 let shared;
@@ -48,7 +48,7 @@ const SUPERNOVA_THRESHOLD = 0.7;
 
 // Gameplay Constants  
 const TOTAL_NUMBER_OF_PLAYERS = 24
-const SPACECRAFT_SIZE = 90; // Was 40
+const SPACECRAFT_SIZE = 110; // Was 40
 const SPACECRAFT_SPEED = 8;
 const MAX_PLAYERS_PER_TEAM = 12;
 const BATTLE_RESOLUTION_TIME = 6000; // 5 seconds in milliseconds
@@ -58,8 +58,9 @@ const BULLET_SPEED = 4;
 const BULLET_DIAMETER = 10;
 
 // Images
-let spacecraftImages = [];
-let canonImages = []; 
+let spacecraftBlueImages = [];
+let spacecraftGreenImages = [];
+let canonImages = [];
 let minimapImg = []; // jenskh
 
 // UI Variables
@@ -71,9 +72,9 @@ let message = "";
 // Game Controle Variables
 let fixedMinimap
 let selectedPlanet
-let solarSystem 
-let planetIndexBlue = 3
-let planetIndexGreen = 3
+let solarSystem
+let planetIndexBlue = 0
+let planetIndexGreen = 0
 let canonTowersGenerated = false;
 let isWarpingUp = false;
 let hasWarped = false;
@@ -119,17 +120,17 @@ const planetColors = {
 // Character Definitions 
 const CHARACTER_DEFINITIONS = [
     { rank: -1, name: "Core Command", id: "F", imageId: 0, count: 1, color: 'purple', isCoreCommand: true },
-    { rank: 10, name: "Star Commander", id: "10", imageId: 11, count: 1, color: 'cyan', isStarCommand: true },
-    { rank: 9, name: "Fleet Admiral", id: "9", imageId: 10, count: 1, color: 'magenta' },
+    { rank: 10, name: "Star Commander", id: "10", imageId: 1, count: 1, color: 'cyan', isStarCommand: true },
+    { rank: 9, name: "Fleet Admiral", id: "9", imageId: 2, count: 1, color: 'magenta' },
     { rank: 8, name: "Star Captain", id: "8", imageId: 3, count: 2, color: 'lime' },
     { rank: 7, name: "Squadron Leader", id: "7", imageId: 4, count: 3, color: 'teal' },
     { rank: 6, name: "Ship Captain", id: "6", imageId: 5, count: 4, color: 'lavender' },
-    { rank: 5, name: "Lt. Commander", id: "5", imageId: 9, count: 4, color: 'maroon' },
+    { rank: 5, name: "Lt. Commander", id: "5", imageId: 6, count: 4, color: 'maroon' },
     { rank: 4, name: "Chief P. Officer", id: "4", imageId: 7, count: 4, color: 'olive' },
     { rank: 3, name: "Engineer", id: "3", imageId: 8, count: 5, color: 'yellow', isEngineer: true }, // Special ability
-    { rank: 2, name: "Power Glider", id: "2", imageId: 6, count: 8, color: 'purple' },
-    { rank: 1, name: "Stealth Squad", id: "S", imageId: 1, count: 1, color: 'orange', isStealthSquad: true }, // Special ability
-    { rank: 0, name: "Recon Drone", id: "D", imageId: 2, count: 6, color: 'brown', isReconDrone: true }, // Special rank 0 for Bomb
+    { rank: 2, name: "Power Glider", id: "2", imageId: 9, count: 8, color: 'purple' },
+    { rank: 1, name: "Stealth Squad", id: "S", imageId: 10, count: 1, color: 'orange', isStealthSquad: true }, // Special ability
+    { rank: 0, name: "Recon Drone", id: "D", imageId: 11, count: 6, color: 'brown', isReconDrone: true }, // Special rank 0 for Bomb
 ];
 
 /**
@@ -178,12 +179,12 @@ function preload() {
         showBlurAndTintEffects: true,
         gameObjects: [],  // Start with empty array jens
         canonTowerHits: Array(15).fill(0),
-        canonTowerCount: 1,
+        canonTowerCount: 3,
         canonTowerShootingInterval: 2000,
         spacecraftSize: SPACECRAFT_SIZE,
         spacecraftSpeed: SPACECRAFT_SPEED,
         bulletSpeed: BULLET_SPEED,
-        numberOfSimuntaneousBullets: 3,
+        numberOfSimuntaneousBullets: 2,
     });
 
     me = partyLoadMyShared({
@@ -207,7 +208,7 @@ function setup() {
     backgroundManager = new BackgroundManager();
     imageIndex8Manager = new ImageIndex8Manager();
     imageIndex10Manager = new ImageIndex10Manager();
-    imageIndex11Manager = new ImageIndex11Manager(); 
+    imageIndex11Manager = new ImageIndex11Manager();
     imageIndex13Manager = new ImageIndex13Manager();
     imageIndex16Manager = new ImageIndex16Manager();
     gameImageManager = new GameImageManager();
@@ -218,15 +219,18 @@ function setup() {
 
     createSpacecrafts();
 
-    cloakedBlueSpacecraftImage = loadImage(`images/spacecraft/spacecraftBlue.png`);
-    cloakedGreenSpacecraftImage = loadImage(`images/spacecraft/spacecraftGreen.png`);
-    
+    cloakedBlueSpacecraftImage = loadImage(`images/spacecraft/spacecraftBlueCloaked.png`);
+    cloakedGreenSpacecraftImage = loadImage(`images/spacecraft/spacecraftGreenCloaked.png`);
+
     for (let i = 0; i < 3; i++) {
         canonImages[i] = loadImage(`images/spacecraft/canon${i}.png`);
     }
 
-    for (let i = 0; i < 13; i++) {
-        spacecraftImages[i] = loadImage(`images/spacecraft/spacecraft${i}.png`);
+    for (let i = 0; i < 12; i++) {
+        spacecraftBlueImages[i] = loadImage(`images/spacecraft/spacecraftBlue${i}.png`);
+    }
+    for (let i = 0; i < 12; i++) {
+        spacecraftGreenImages[i] = loadImage(`images/spacecraft/spacecraftGreen${i}.png`);
     }
     fixedMinimapImage = [];
     fixedMinimapImage[0] = loadImage("images/planet0/planet0minimapWithWarpGate.png");
@@ -330,6 +334,7 @@ function draw() {
     // State machine for game phases
     // If player hasn't chosen a team yet, always show setup screen
     if (!me.isReady) {
+
         // Draw background elements (stars, etc.) jens
         backgroundManager.drawBackground();
 
@@ -347,6 +352,7 @@ function draw() {
                 break;
             case "IN-GAME":
                 selectedPlanet = solarSystem.planets[me.planetIndex];
+
                 fixedMinimap.update(selectedPlanet.diameterPlanet, selectedPlanet.xWarpGateUp, selectedPlanet.yWarpGateUp, selectedPlanet.xWarpGateDown, selectedPlanet.yWarpGateDown, selectedPlanet.diameterWarpGate);
 
                 if (shared.showGraphics) {
@@ -428,7 +434,20 @@ function drawGameTimer() {
     // Change color to red if less than 1 minute remains
     fill(200);
 
-    text(`Match Time: ${timeString}`, timerX, timerY);
+    const statsWidth = 300; // Approximate width for the stats box
+    const infoX = SCREEN_WIDTH - statsWidth - 3; // Position from the right edge of the screen
+    const infoY = 20;
+    //    const lineHeight = 20;
+
+    textAlign(LEFT, TOP);
+    text(`Match Time: ${timeString}`, infoX, infoY);
+    if (partyIsHost()) {
+        text(`Howto navigte (host):`, infoX, infoY + 40);
+    } else {
+        text(`Howto navigte: `, infoX, infoY + 40);
+    }
+    text(`Global movement Keys: WASD `, infoX, infoY + 60);
+    text(`Local movement Keys: TFGH `, infoX, infoY + 80);
     pop();
 }
 
@@ -458,6 +477,7 @@ function receiveNewDataFromHost() {
     gameObjects.forEach((canon, index) => {
         canon.diameter = shared.gameObjects[index].diameter;
         canon.color = shared.gameObjects[index].color;
+        canon.type = shared.gameObjects[index].type;
 
         canon.xGlobal = shared.gameObjects[index].xGlobal;
         canon.yGlobal = shared.gameObjects[index].yGlobal;
@@ -814,7 +834,7 @@ function drawTopLeftInfo() {
 function drawGameStats() {
     const statsWidth = 300; // Approximate width for the stats box
     const statsX = SCREEN_WIDTH - statsWidth - 3; // Position from the right edge of the screen
-    const statsY = 20;
+    const statsY = 140;
     const lineHeight = 20;
 
     fill(200);
@@ -911,7 +931,11 @@ function drawCharacterLegend() {
 
             let imageId = getImageId(def.id); // jens  
 
-            image(spacecraftImages[imageId], legendX, currentItemContentStartY, circleDiameter, circleDiameter);
+            if (me.team === 'blue') {
+                image(spacecraftBlueImages[imageId], legendX, currentItemContentStartY, circleDiameter, circleDiameter);
+            } else {
+                image(spacecraftGreenImages[imageId], legendX, currentItemContentStartY, circleDiameter, circleDiameter);
+            }
             //            fill(def.color);
         } else {
             fill(def.color);
@@ -927,7 +951,12 @@ function drawCharacterLegend() {
                 let imageId = getImageId(def.id); // jens
                 fill(255)
                 ellipse(legendX + circleDiameter / 2 + 370, legendTitleY + circleDiameter / 2 + 250, circleDiameter * 3.5, circleDiameter * 3.5);
-                image(spacecraftImages[imageId], legendX + 320, legendTitleY + 200, circleDiameter * 3, circleDiameter * 3);
+
+                if (me.team === 'blue') {
+                    image(spacecraftBlueImages[imageId], legendX + 320, legendTitleY + 200, circleDiameter * 3, circleDiameter * 3);
+                } else {
+                    image(spacecraftGreenImages[imageId], legendX + 320, legendTitleY + 200, circleDiameter * 3, circleDiameter * 3);
+                }
             }
         }
         itemCount++;
@@ -1251,18 +1280,20 @@ function setPlayerInfo(team) {
             message = "Cannot join Green Team, it is full.";
             return;
         }
-
-        if (team === 'blue') {
-            me.planetIndex = planetIndexBlue;
-        } else {
-            me.planetIndex = planetIndexGreen;
-        }
-
-        me.xGlobal = 3000 / 2 - GAME_AREA_WIDTH / 2 + 400;
-        me.yGlobal = 3000 / 2 - GAME_AREA_HEIGHT / 2;
-        me.xLocal = GAME_AREA_WIDTH / 2 + 100;
-        me.yLocal = GAME_AREA_HEIGHT / 2;
-
+        setSpawnLocation();
+        /*
+                if (team === 'blue') {
+                    me.planetIndex = planetIndexBlue;
+                } else {
+                    me.planetIndex = planetIndexGreen;
+                }
+                selectedPlanet = solarSystem.planets[me.planetIndex];
+        
+                me.xGlobal = 3000 / 2 - GAME_AREA_WIDTH / 2 + 400;
+                me.yGlobal = 3000 / 2 - GAME_AREA_HEIGHT / 2;
+                me.xLocal = GAME_AREA_WIDTH / 2 + 100;
+                me.yLocal = GAME_AREA_HEIGHT / 2;
+        */
         me.playerDisplayName = playerDisplayName;
         me.team = team;
         me.isReady = true;
@@ -1325,6 +1356,15 @@ function keyPressed() {
     if (keyCode === 74) { // j
         shared.canonTowerCount = 1;
         updateTowerCount();
+    }
+    if (keyCode === 77) { // m
+        //    shared.canonTowerCount = 1;
+    }
+    if (keyCode === 78) { // n
+        //    shared.canonTowerCount = 1;
+    }
+    if (keyCode === 66) { // b
+        //    shared.canonTowerCount = 1;
     }
 }
 
@@ -1531,21 +1571,39 @@ function handleCharacterSelection() {
             me.status = "available";
             me.playerColor = item.color;
 
-            me.xGlobal = 3000 / 2 - GAME_AREA_WIDTH / 2 + random(-200, 200);
-            me.yGlobal = 3000 / 2 - GAME_AREA_HEIGHT / 2 + random(-200, 200);
-            me.xLocal = GAME_AREA_WIDTH / 2;
-            me.yLocal = GAME_AREA_HEIGHT / 2;
-
-            if (me.team === 'blue') {
-                me.planetIndex = planetIndexBlue;
-            } else {
-                me.planetIndex = planetIndexGreen;
-            }
+            setSpawnLocation();
 
             console.log(`Selected: ${me.characterName} (${me.characterInstanceId}) for team ${me.team}`);
             break; // Exit loop once selection is made
         }
     }
+}
+
+function setSpawnLocation() {
+
+    if (me.team === 'blue') {
+        me.planetIndex = planetIndexBlue;
+    } else {
+        me.planetIndex = planetIndexGreen;
+    }
+    selectedPlanet = solarSystem.planets[me.planetIndex];
+
+    const planetCenterX = selectedPlanet.diameterPlanet / 2;
+    const planetCenterY = selectedPlanet.diameterPlanet / 2;
+
+    if (me.team === 'blue') {
+        // Blue team spawns on the right side of the planet
+        me.xGlobal = planetCenterX + random(400, 600);
+    } else {
+        // Green team spawns on the left side of the planet
+        me.xGlobal = planetCenterX - random(400, 600);
+    }
+
+    // Y position is the same regardless of team, but with some randomness
+    me.yGlobal = planetCenterY - random(100, 200);
+
+    me.xLocal = GAME_AREA_WIDTH / 2;
+    me.yLocal = GAME_AREA_HEIGHT / 2;
 }
 
 function handlePlayerMovement() {
@@ -1569,47 +1627,49 @@ function handlePlayerMovement() {
         return;
     }
 
-    // Check if warp gate is in cooldown
-    const currentTime = millis();
+    if (me.lastWarpTime > 0) {
+        // Check if warp gate is in cooldown
+        const currentTime = millis();
 
-    let warpTime = int(currentTime - me.lastWarpTime)
-    //    console.log(warpTime);
-    //    if (supernovaStarIndex > -1) { 
-    if (warpTime < 3000) {
-        console.log("Warp gate cooldown < 2 sec is active");
-        return
-    } else if ((warpTime < 5000) && !hasWarped) {
-        console.log("Warp gate cooldown < 4 and !hasWarped");
-        hasWarped = true;
+        let warpTime = int(currentTime - me.lastWarpTime)
+        //    console.log(warpTime);
+        //    if (supernovaStarIndex > -1) { 
+        if (warpTime < 3000) {
+            console.log("Warp gate cooldown < 2 sec is active");
+            return
+        } else if ((warpTime < 5000) && !hasWarped) {
+            console.log("Warp gate cooldown < 4 and !hasWarped");
+            hasWarped = true;
 
-        console.log("supernovaStarIndex", supernovaStarIndex);
-        let docorativeStar = backgroundManager.decorativeStars[supernovaStarIndex];
-        if (docorativeStar) {
-            docorativeStar.setupSupernovaProperties()
-        }
-        if (isWarpingUp) {
-            if (me.planetIndex === 4) {
-                me.planetIndex = 0;
-            } else {
-                me.planetIndex++;
+            console.log("supernovaStarIndex", supernovaStarIndex);
+            let docorativeStar = backgroundManager.decorativeStars[supernovaStarIndex];
+            if (docorativeStar) {
+                docorativeStar.setupSupernovaProperties()
             }
-            me.xGlobal = solarSystem.planets[me.planetIndex].xWarpGateUp - me.xLocal;
-            me.yGlobal = solarSystem.planets[me.planetIndex].yWarpGateUp - me.yLocal;
-        } else {
-            if (me.planetIndex === 0) {
-                me.planetIndex = 4;
+            if (isWarpingUp) {
+                if (me.planetIndex === 4) {
+                    me.planetIndex = 0;
+                } else {
+                    me.planetIndex++;
+                }
+                console.log("me warping up to planet", me.planetIndex);
+                me.xGlobal = solarSystem.planets[me.planetIndex].xWarpGateUp - me.xLocal;
+                me.yGlobal = solarSystem.planets[me.planetIndex].yWarpGateUp - me.yLocal;
             } else {
-                me.planetIndex--;
+                if (me.planetIndex === 0) {
+                    me.planetIndex = 4;
+                } else {
+                    me.planetIndex--;
+                }
+                me.xGlobal = solarSystem.planets[me.planetIndex].xWarpGateDown - me.xLocal;
+                me.yGlobal = solarSystem.planets[me.planetIndex].yWarpGateDown - me.yLocal;
             }
-            me.xGlobal = solarSystem.planets[me.planetIndex].xWarpGateDown - me.xLocal;
-            me.yGlobal = solarSystem.planets[me.planetIndex].yWarpGateDown - me.yLocal;
+        } else if (warpTime < 5000) {
+            return
+        } else if (warpTime > 5000) {
+            hasWarped = false;
         }
-    } else if (warpTime < 5000) {
-        return
-    } else if (warpTime > 5000) {
-        hasWarped = false;
     }
-    //  }
 
     // Check for collisions with opponents
     const opponents = spacecrafts.filter(spacecraft =>
@@ -2091,6 +2151,8 @@ function detectCollisionsAndInitiateBattles() {
         let player1 = guests.find(p => p.playerNumber === char1.takenByPlayerId);
         //        let player1 = spacecrafts.find(p => p.playerNumber === char1.takenByPlayerId);
 
+
+
         if (!player1) {
             console.warn(`HOST: Player not found for active character ${char1.instanceId}`);
             continue;
@@ -2145,12 +2207,12 @@ function detectCollisionsAndInitiateBattles() {
             //            let player2 = spacecrafts.find(p => p.playerNumber === char2.takenByPlayerId);
 
             if (!player2) {
-                console.warn(`HOST: Player not found for active character ${char2.instanceId}`);
+                //console.warn(`HOST: Player not found for active character ${char2.instanceId}`);
                 continue;
             }
 
-            // Must be different teams
-            if (player1.team === player2.team) continue;
+            // Must be different teams and on the same planet
+            if (player1.team === player2.team || player1.planetIndex != player2.planetIndex) continue;
 
             // Check collision distance using player positions
             let d = dist(player1.xGlobal + player1.xLocal, player1.yGlobal + player1.yLocal, player2.xGlobal + player2.xLocal, player2.yGlobal + player2.yLocal);
@@ -2611,6 +2673,7 @@ function updateTowerCount() {
         yGlobal: tower.yGlobal,
         diameter: tower.diameter,
         color: tower.color,
+        type: tower.type,
         bullets: [],
         angle: 0,
         hits: Array(15).fill(0),
@@ -2626,33 +2689,33 @@ function generateTowers(count) {
 
     // Table of predefined tower locations
     const towerTable = [
-        { x: 1000, y: 1000, color: 'red' },
-        { x: 1200, y: 1000, color: 'blue' },
-        { x: 1400, y: 1000, color: 'green' },
-        { x: 1600, y: 1000, color: 'orange' },
-        { x: 1800, y: 1000, color: 'purple' },
-        { x: 2000, y: 1000, color: 'yellow' },
+        { x: 1000, y: 1000, color: 'red', type: 0 },
+        { x: 1000, y: 2000, color: 'blue', type: 1 },
+        { x: 1500, y: 1500, color: 'green', type: 2 },
+        { x: 1600, y: 1000, color: 'orange', type: 0 },
+        { x: 1800, y: 1000, color: 'purple', type: 1 },
+        { x: 2000, y: 1000, color: 'yellow', type: 2 },
 
-        { x: 1000, y: 1200, color: 'red' },
-        { x: 1200, y: 1200, color: 'blue' },
-        { x: 1400, y: 1200, color: 'green' },
-        { x: 1600, y: 1200, color: 'orange' },
-        { x: 1800, y: 1200, color: 'purple' },
-        { x: 2000, y: 1200, color: 'yellow' },
+        { x: 1000, y: 1200, color: 'red', type: 0 },
+        { x: 1200, y: 1200, color: 'blue', type: 1 },
+        { x: 1400, y: 1200, color: 'green', type: 2 },
+        { x: 1600, y: 1200, color: 'orange', type: 0 },
+        { x: 1800, y: 1200, color: 'purple', type: 1 },
+        { x: 2000, y: 1200, color: 'yellow', type: 2 },
 
-        { x: 1000, y: 1400, color: 'red' },
-        { x: 1200, y: 1400, color: 'blue' },
-        { x: 1400, y: 1400, color: 'green' },
-        { x: 1600, y: 1400, color: 'orange' },
-        { x: 1800, y: 1400, color: 'purple' },
-        { x: 2000, y: 1400, color: 'yellow' },
+        { x: 1000, y: 1400, color: 'red', type: 0 },
+        { x: 1200, y: 1400, color: 'blue', type: 1 },
+        { x: 1400, y: 1400, color: 'green', type: 2 },
+        { x: 1600, y: 1400, color: 'orange', type: 0 },
+        { x: 1800, y: 1400, color: 'purple', type: 1 },
+        { x: 2000, y: 1400, color: 'yellow', type: 2 },
 
-        { x: 1000, y: 1600, color: 'red' },
-        { x: 1200, y: 1600, color: 'blue' },
-        { x: 1400, y: 1600, color: 'green' },
-        { x: 1600, y: 1600, color: 'orange' },
-        { x: 1800, y: 1600, color: 'purple' },
-        { x: 2000, y: 1600, color: 'yellow' },
+        { x: 1000, y: 1600, color: 'red', type: 0 },
+        { x: 1200, y: 1600, color: 'blue', type: 1 },
+        { x: 1400, y: 1600, color: 'green', type: 2 },
+        { x: 1600, y: 1600, color: 'orange', type: 0 },
+        { x: 1800, y: 1600, color: 'purple', type: 1 },
+        { x: 2000, y: 1600, color: 'yellow', type: 2 },
     ];
 
     // Add up to three towers from the table jens
@@ -2670,6 +2733,7 @@ function generateTowers(count) {
             xSpawnGlobal: tower.x,
             ySpawnGlobal: tower.y,
             color: tower.color,
+            type: tower.type,
             planetIndex: 3,
         }));
     }

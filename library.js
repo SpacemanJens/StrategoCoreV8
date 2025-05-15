@@ -105,32 +105,16 @@ class Spacecraft {
                     let imageId = getImageId(this.characterId); // jens  
 
                     if (this.team === 'blue') {
-                        drawingContext.shadowBlur = 60; // Increased blur
-                        drawingContext.shadowColor = 'rgba(40, 233, 255, 615)'; // Blue
+                        image(spacecraftBlueImages[imageId], 0, 0, this.diameter * 1.5, this.diameter * 1.5);
                     } else {
-                        drawingContext.shadowBlur = 60; // Increased blur
-                        drawingContext.shadowColor = 'rgba(38, 255, 168, 615)'; // Green
+                        image(spacecraftGreenImages[imageId], 0, 0, this.diameter * 1.5, this.diameter * 1.5);
                     }
-                    image(spacecraftImages[imageId], 0, 0, this.diameter * 1.5, this.diameter * 1.5);
                 } else {
-                    if (shared.showBlurAndTintEffects) {
-                        if (this.team === 'blue') {
-                            drawingContext.shadowBlur = 60; // Increased blur
-                            drawingContext.shadowColor = 'rgba(40, 233, 255, 615)'; // Blue
-                            tint(40, 233, 255, 140); // blue
-                        } else {
-                            drawingContext.shadowBlur = 60; // Increased blur
-                            drawingContext.shadowColor = 'rgba(38, 255, 168, 615)'; // Green
-                            tint(38, 255, 168, 140); // green
-                        }
+                    if (this.team === 'blue') {
                         image(cloakedBlueSpacecraftImage, 0, 0, this.diameter * 1.5, this.diameter * 1.5);
                     } else {
-                        if (this.team === 'blue') {
-                            image(cloakedBlueSpacecraftImage, 0, 0, this.diameter * 1.5, this.diameter * 1.5);
-                        } else {
-                            image(cloakedGreenSpacecraftImage, 0, 0, this.diameter * 1.5, this.diameter * 1.5);
-                        }
-                    }
+                        image(cloakedGreenSpacecraftImage, 0, 0, this.diameter * 1.5, this.diameter * 1.5);
+                    } 
                 }
 
                 pop();
@@ -237,6 +221,7 @@ class Canon {
         this.xSpawnGlobal = config.xSpawnGlobal;
         this.ySpawnGlobal = config.ySpawnGlobal;
         this.color = config.color;
+        this.type = config.type;
         this.bullets = config.bullets || [];
         this.hits = config.hits || Array(15).fill(0);
         this.planetIndex = config.planetIndex;
@@ -244,7 +229,7 @@ class Canon {
         this.amplitude = 50; // Movement range
         this.speed = 0.02; // Movement speed jens
         this.lastShotTime = 0;  // Add this line
-        this.type = floor(random(0, 3));  // 0, 1 or 2 (randomly chosen)
+        //        this.type = floor(random(0, 3));  // 0, 1 or 2 (randomly chosen)
     }
 
     draw() {
@@ -372,7 +357,7 @@ class Canon {
             let bullet = this.bullets[i];
 
             spacecrafts.forEach((spacecraft) => {
-                if (spacecraft.xLocal >= 0) {  // Only check visible spacecrafts jens
+                if (spacecraft.xLocal >= 0 && this.planetIndex === spacecraft.planetIndex) {  // Only check visible spacecrafts jens
                     let d = dist(spacecraft.xGlobal + spacecraft.xLocal, spacecraft.yGlobal + spacecraft.yLocal, bullet.xGlobal, bullet.yGlobal);
                     if (d < (spacecraft.diameter + BULLET_DIAMETER) / 2) {
                         shared.canonTowerHits[spacecraft.playerNumber]++;
@@ -610,10 +595,10 @@ class Planet extends CelestialObject {
 
     draw() {
 
-        const colorScheme = planetColors[me.planetIndex];
+        const colorScheme = planetColors[this.planetIndex];
 
         if (shared.showGraphics) {
-            image(fixedMinimapImage[this.planetIndex], this.x, this.y, this.size, this.size);
+            image(fixedMinimapImage[this.planetIndex], this.x, this.y, this.diameterMinimap, this.diameterMinimap);
         } else {
 
             this.drawGradient(colorScheme.center, colorScheme.edge);
@@ -672,7 +657,7 @@ class Planet extends CelestialObject {
     }
 
     drawSpacecrafts() {
-        spacecrafts.forEach(spacecraft => {
+        spacecrafts.forEach(spacecraft => { 
 
             if (!spacecraft.playerColor
                 || !spacecraft.hasCharacter
