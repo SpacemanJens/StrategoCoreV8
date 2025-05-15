@@ -155,7 +155,7 @@ function getImageId(characterId) {
 function preload() {
     partyConnect(
         "wss://p5js-spaceman-server-29f6636dfb6c.herokuapp.com",
-        "jkv-strategoCoreV8",
+        "jkv-strategoCoreV8d",
         room
     );
 
