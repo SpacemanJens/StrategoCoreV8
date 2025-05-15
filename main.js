@@ -351,7 +351,9 @@ function draw() {
                 drawGameSetup();
                 break;
             case "IN-GAME":
+
                 selectedPlanet = solarSystem.planets[me.planetIndex];
+                if (!selectedPlanet) return
 
                 fixedMinimap.update(selectedPlanet.diameterPlanet, selectedPlanet.xWarpGateUp, selectedPlanet.yWarpGateUp, selectedPlanet.xWarpGateDown, selectedPlanet.yWarpGateDown, selectedPlanet.diameterWarpGate);
 
