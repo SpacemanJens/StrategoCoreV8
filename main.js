@@ -195,32 +195,7 @@ function preload() {
 
     guests = partyLoadGuestShareds();
 
-    //backgroundManager = new BackgroundManager();
-}
-
-function setup() {
-    createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT);
-    frameRate(60);
-    noStroke();
-
-    // startpage
-    // Make sure these classes are defined before using them
-    // Initialize manager instances first to avoid undefined references
-    backgroundManager = new BackgroundManager();
-    imageIndex8Manager = new ImageIndex8Manager();
-    imageIndex10Manager = new ImageIndex10Manager();
-    imageIndex11Manager = new ImageIndex11Manager();
-    imageIndex13Manager = new ImageIndex13Manager();
-    imageIndex16Manager = new ImageIndex16Manager();
-    gameImageManager = new GameImageManager();
-
-    backgroundManager.initialize();
-    createNameInput();
-    initializeCharacterList();
-
-    createSpacecrafts();
-
-    cloakedPurpleSpacecraftImage = loadImage(`images/spacecraft/spacecraftPurpleCloaked.png`);
+        cloakedPurpleSpacecraftImage = loadImage(`images/spacecraft/spacecraftPurpleCloaked.png`);
     cloakedGreenSpacecraftImage = loadImage(`images/spacecraft/spacecraftGreenCloaked.png`);
 
     for (let i = 0; i < 3; i++) {
@@ -257,6 +232,31 @@ function setup() {
     imageIndex11Manager.loadImages();
     imageIndex13Manager.loadImages();
     imageIndex16Manager.loadImages();
+
+    //backgroundManager = new BackgroundManager();
+}
+
+function setup() {
+    createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT);
+    frameRate(60);
+    noStroke();
+
+    // startpage
+    // Make sure these classes are defined before using them
+    // Initialize manager instances first to avoid undefined references
+    backgroundManager = new BackgroundManager();
+    imageIndex8Manager = new ImageIndex8Manager();
+    imageIndex10Manager = new ImageIndex10Manager();
+    imageIndex11Manager = new ImageIndex11Manager();
+    imageIndex13Manager = new ImageIndex13Manager();
+    imageIndex16Manager = new ImageIndex16Manager();
+    gameImageManager = new GameImageManager();
+
+    backgroundManager.initialize();
+    createNameInput();
+    initializeCharacterList();
+
+    createSpacecrafts();
 
     // Only generate new Towers one time when a new host is assigned
     if (!canonTowersGenerated && partyIsHost()) {
