@@ -233,6 +233,6 @@ function checkCollisionsWithWarpGate() {
         me.yGlobal = solarSystem.planets[me.planetIndex].yWarpGateDown - me.yLocal;
         me.lastWarpTime = currentTime; // Set the last warp time
         return;
-        */
+        */ 
     }
 }

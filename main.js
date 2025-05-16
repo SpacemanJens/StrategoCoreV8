@@ -60,6 +60,7 @@ const BULLET_DIAMETER = 10;
 // Images
 let spacecraftBlueImages = [];
 let spacecraftGreenImages = [];
+let spacecraftPurpleImages = [];
 let canonImages = [];
 let minimapImg = []; // jenskh
 
@@ -155,7 +156,7 @@ function getImageId(characterId) {
 function preload() {
     partyConnect(
         "wss://p5js-spaceman-server-29f6636dfb6c.herokuapp.com",
-        "jkv-strategoCoreV8e",
+        "jkv-strategoCoreV8r2",
         room
     );
 
@@ -219,7 +220,7 @@ function setup() {
 
     createSpacecrafts();
 
-    cloakedBlueSpacecraftImage = loadImage(`images/spacecraft/spacecraftBlueCloaked.png`);
+    cloakedPurpleSpacecraftImage = loadImage(`images/spacecraft/spacecraftPurpleCloaked.png`);
     cloakedGreenSpacecraftImage = loadImage(`images/spacecraft/spacecraftGreenCloaked.png`);
 
     for (let i = 0; i < 3; i++) {
@@ -232,7 +233,10 @@ function setup() {
     for (let i = 0; i < 12; i++) {
         spacecraftGreenImages[i] = loadImage(`images/spacecraft/spacecraftGreen${i}.png`);
     }
-    fixedMinimapImage = [];
+    for (let i = 0; i < 12; i++) {
+        spacecraftPurpleImages[i] = loadImage(`images/spacecraft/spacecraftPurple${i}.png`);
+    }
+    fixedMinimapImage = []; 
     fixedMinimapImage[0] = loadImage("images/planet0/planet0minimapWithWarpGate.png");
     fixedMinimapImage[1] = loadImage("images/planet1/planet1minimapWithWarpGate.png"); // You should replace these with
     fixedMinimapImage[2] = loadImage("images/planet2/planet2minimapWithWarpGate.png"); // actual images for each planet
@@ -824,7 +828,7 @@ function drawTopLeftInfo() {
         if (partyIsHost()) {
             text(`(Host)`, 10, 5);
         }
-        text(`Welcome, ${me.playerDisplayName}! Team: ${me.team === 'blue' ? 'Blue' : 'Green'}.`, 10, 20);
+        text(`Welcome, ${me.playerDisplayName}! Team: ${me.team === 'blue' ? 'Purple' : 'Green'}.`, 10, 20);
         if (me.hasCharacter) {
             text(`You are a: ${me.characterName}`, 10, 50);
         } else {
@@ -844,8 +848,10 @@ function drawGameStats() {
     textAlign(LEFT, TOP);
 
     text("Game Stats:", statsX, statsY);
-    fill(0, 150, 255); // Blue color
-    text(`Blue Wins: ${shared.blueWins || 0}`, statsX, statsY + lineHeight);
+//    fill(0, 150, 255); // Blue color
+        fill(133, 69, 196);
+  
+    text(`Purple Wins: ${shared.blueWins || 0}`, statsX, statsY + lineHeight);
     fill(0, 200, 100); // Green color
     text(`Green Wins: ${shared.greenWins || 0}`, statsX, statsY + lineHeight * 2);
     fill(200); // White/Gray color
@@ -861,11 +867,15 @@ function drawGameStats() {
     //text(`Number of  bullets: ${totalNumberOfBullets}`, statsX, statsY + lineHeight * 8);
 
     //   Some player info to detect players with the same player name because of simultaneous joining 
-    fill(0, 150, 255); // Blue color
-    text(`Players on the blue team: (${blueTeamCount})`, statsX, statsY + lineHeight * 5);
+    //fill(0, 150, 255); // Blue color
+    fill(133, 69, 196);
+
+    text(`Players on the purple team: (${blueTeamCount})`, statsX, statsY + lineHeight * 5);
 
     guests.filter(p => p.isReady && p.team === 'blue').forEach((p, index) => {
-        fill(0, 150, 255); // Blue color
+        //        fill(0, 150, 255); // Blue color
+        fill(133, 69, 196);
+
         text(`${p.playerName},${p.playerNumber}: ${me.status}`, statsX, statsY + lineHeight * (6 + index));
     });
     fill(0, 200, 100); // Green color
@@ -933,11 +943,11 @@ function drawCharacterLegend() {
 
             let imageId = getImageId(def.id); // jens  
 
-            if (me.team === 'blue') {
-                image(spacecraftBlueImages[imageId], legendX, currentItemContentStartY, circleDiameter, circleDiameter);
-            } else {
-                image(spacecraftGreenImages[imageId], legendX, currentItemContentStartY, circleDiameter, circleDiameter);
-            }
+            //            if (me.team === 'blue') {
+            image(spacecraftBlueImages[imageId], legendX, currentItemContentStartY, circleDiameter, circleDiameter);
+            //            } else {
+            //                image(spacecraftGreenImages[imageId], legendX, currentItemContentStartY, circleDiameter, circleDiameter);
+            //            }
             //            fill(def.color);
         } else {
             fill(def.color);
@@ -954,11 +964,11 @@ function drawCharacterLegend() {
                 fill(255)
                 ellipse(legendX + circleDiameter / 2 + 370, legendTitleY + circleDiameter / 2 + 250, circleDiameter * 3.5, circleDiameter * 3.5);
 
-                if (me.team === 'blue') {
-                    image(spacecraftBlueImages[imageId], legendX + 320, legendTitleY + 200, circleDiameter * 3, circleDiameter * 3);
-                } else {
-                    image(spacecraftGreenImages[imageId], legendX + 320, legendTitleY + 200, circleDiameter * 3, circleDiameter * 3);
-                }
+                //                if (me.team === 'blue') {
+                image(spacecraftBlueImages[imageId], legendX + 320, legendTitleY + 200, circleDiameter * 3, circleDiameter * 3);
+                //                } else {
+                //                    image(spacecraftGreenImages[imageId], legendX + 320, legendTitleY + 200, circleDiameter * 3, circleDiameter * 3);
+                //                }
             }
         }
         itemCount++;
@@ -1036,7 +1046,9 @@ function drawSpacecraft(playerData, characterData) {
     // Define RGB values directly instead of using color()
     let r, g, b;
     if (playerData.team === 'blue') {
-        r = 0; g = 150; b = 255;
+//        r = 0; g = 150; b = 255;
+        r = 133; g = 69; b = 196;
+
     } else if (playerData.team === 'green') {
         r = 0; g = 200; b = 100;
     } else {
@@ -1117,7 +1129,7 @@ function drawGameSetup() {
                 else {
                     chooseTeamBlueButton.hide();
                     fill(150); textSize(14); textAlign(CENTER, CENTER);
-                    text("Blue Team Full", chooseTeamBlueButton.x + chooseTeamBlueButton.width / 2,
+                    text("Purple Team Full", chooseTeamBlueButton.x + chooseTeamBlueButton.width / 2,
                         chooseTeamBlueButton.y + chooseTeamBlueButton.height + 10);
                 }
             }
@@ -1273,7 +1285,7 @@ function setPlayerInfo(team) {
 
         if (team === 'blue' && blueTeamCount >= MAX_PLAYERS_PER_TEAM) {
             // alert("Cannot join Blue Team, it is full (max 3 players).");
-            message = "Cannot join Blue Team, it is full.";
+            message = "Cannot join Purple Team, it is full.";
             return;
         }
 
@@ -1447,7 +1459,8 @@ function drawCharacterList() {
             mouseY > displayY && mouseY < displayY + itemHeight) {
 
             if (canSelectItem) {
-                fill(0, 150, 200, 150); // Highlight selectable
+              fill(0, 150, 200, 150); // Highlight selectable
+//                fill(133, 69, 196, 150);
                 noStroke();
                 rect(listX, displayY, itemWidth, itemHeight);
             } else if (isAvailable) {
@@ -1636,7 +1649,7 @@ function handlePlayerMovement() {
         let warpTime = int(currentTime - me.lastWarpTime)
         //    console.log(warpTime);
         //    if (supernovaStarIndex > -1) { 
-        if (warpTime < 3000) {
+        if (warpTime < 4000) {
             console.log("Warp gate cooldown < 2 sec is active");
             return
         } else if ((warpTime < 5000) && !hasWarped) {
@@ -2132,7 +2145,7 @@ function checkIfCoreCommandDisconnected() {
         return;
     }
     if (!greenFlagSelected) {
-        console.log(`HOST: GAME OVER! Blue team wins as blue teams Core Command disconnected`);
+        console.log(`HOST: GAME OVER! Purple team wins as blue teams Core Command disconnected`);
         shared.winningTeam = 'blue';
         shared.blueWins = (shared.blueWins || 0) + 1;
         shared.coreCommandDisconnected = true;
@@ -2511,11 +2524,11 @@ function checkWinConditions() {
             } else if (!blueFlagExists) {
                 newGameState = "GAME-FINISHED";
                 newWinningTeam = "green";
-                console.log("HOST: Blue flag eliminated. Green wins.");
+                console.log("HOST: Purple flag eliminated. Green wins.");
             } else if (!greenFlagExists) {
                 newGameState = "GAME-FINISHED";
                 newWinningTeam = "blue";
-                console.log("HOST: Green flag eliminated. Blue wins.");
+                console.log("HOST: Green flag eliminated. Purple wins.");
             }
         } else if (shared.coreCommandLost) {
             newGameState = "GAME-FINISHED";
@@ -2794,4 +2807,3 @@ function twoPlayersWithTheSamePlayerNumberExist() {
 // --------------------
 // Game State Drawing Functions
 // --------------------
-

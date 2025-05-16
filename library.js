@@ -48,14 +48,16 @@ class Spacecraft {
             fill(this.playerColor);
             strokeWeight(3);
             if (this.team === 'blue') {
-                stroke(0, 150, 255);
+                stroke(133, 69, 196);
+//                    stroke(0, 150, 255);
             } else {
                 stroke(0, 200, 100);
             }
         } else {
             noStroke()
             if (this.team === 'blue') {
-                fill(0, 150, 255);
+                stroke(133, 69, 196);
+//                fill(0, 150, 255);
             } else {
                 fill(0, 200, 100);
             }
@@ -105,13 +107,13 @@ class Spacecraft {
                     let imageId = getImageId(this.characterId); // jens  
 
                     if (this.team === 'blue') {
-                        image(spacecraftBlueImages[imageId], 0, 0, this.diameter * 1.5, this.diameter * 1.5);
+                        image(spacecraftPurpleImages[imageId], 0, 0, this.diameter * 1.5, this.diameter * 1.5);
                     } else {
                         image(spacecraftGreenImages[imageId], 0, 0, this.diameter * 1.5, this.diameter * 1.5);
                     }
                 } else {
                     if (this.team === 'blue') {
-                        image(cloakedBlueSpacecraftImage, 0, 0, this.diameter * 1.5, this.diameter * 1.5);
+                        image(cloakedPurpleSpacecraftImage, 0, 0, this.diameter * 1.5, this.diameter * 1.5);
                     } else {
                         image(cloakedGreenSpacecraftImage, 0, 0, this.diameter * 1.5, this.diameter * 1.5);
                     } 
@@ -176,14 +178,15 @@ class Spacecraft {
                 this.drawBullet(bullet);
             });
         }
-    }
-
+    } 
+ 
     drawBullet(bullet) {
         if (this.planetIndex < 0) { return; }
         push();
 
         if (this.team === 'blue') {
-            fill(0, 150, 255);
+//            fill(0, 150, 255);
+            fill(133, 69, 196);
         } else {
             fill(0, 200, 100);
         }

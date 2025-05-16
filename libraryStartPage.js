@@ -58,10 +58,10 @@ function createNameInput() {
     nameInput.size(300, 30);
     nameInput.attribute('placeholder', 'Enter Player Name');
 
-    chooseTeamBlueButton = createButton('Join Blue Team');
+    chooseTeamBlueButton = createButton('Join Purple Team');
     chooseTeamBlueButton.position(centerX, centerY + 50);
     chooseTeamBlueButton.size(145, 40);
-    chooseTeamBlueButton.style('background-color', 'lightblue');
+    chooseTeamBlueButton.style('background-color', 'purple');
     chooseTeamBlueButton.mousePressed(() => setPlayerInfo('blue'));
 
     chooseTeamGreenButton = createButton('Join Green Team');
